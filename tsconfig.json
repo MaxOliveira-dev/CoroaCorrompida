@@ -1,0 +1,27 @@
+
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "outDir": "./dist",
+    "rootDir": "./", 
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "bundler", 
+    "resolveJsonModule": true,
+    "isolatedModules": true, 
+    "noEmit": false 
+  },
+  "include": [
+    "index.tsx", 
+    "App.tsx", 
+    "types.ts",
+    "gameData.ts",
+    "components/**/*.ts", // Includes .ts files in components and subdirectories
+    "components/**/*.tsx" // Includes .tsx files in components and subdirectories
+    ],
+  "exclude": ["node_modules", "dist"]
+}

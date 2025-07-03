@@ -1,0 +1,21 @@
+{
+  "name": "batalha-de-herois",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "serve": "^14.2.3",
+    "typescript": "^5.5.3",
+    "pixi.js": "^7"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && serve -s . -l 3000",
+    "serve": "serve -s . -l 3000"
+  }
+}
