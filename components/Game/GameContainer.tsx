@@ -33,7 +33,7 @@ interface GameContainerProps {
 const defaultEmptyBaseStats: BaseStats = { // Used for enemies if their template lacks base stats
     letalidade: 0, vigor: 0, resistencia: 0, 
     velocidadeAtaque: 0, velocidadeMovimento: 1, 
-    chanceCritica: 0, danoCritico: 50, // Default danoCritico to 50%
+    chanceCritica: 0, danoCritico: 50, // Default danoCritico to 50% posso mudar depois
     chanceEsquiva: 0, vampirismo: 0 
 };
 
