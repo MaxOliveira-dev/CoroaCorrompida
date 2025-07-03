@@ -6,6 +6,18 @@ import { DeathEffect } from './DeathEffect';
 import { calculateFinalStatsForEntity, distanceToTarget } from '../entityUtils';
 import type { BaseStats, EnemyTemplate } from '../../../types';
 
+const defaultEnemyBaseStats: BaseStats = {
+    letalidade: 0,
+    vigor: 0,
+    resistencia: 0,
+    velocidadeAtaque: 0,
+    velocidadeMovimento: 1,
+    chanceCritica: 0,
+    danoCritico: 50,
+    chanceEsquiva: 0,
+    vampirismo: 0,
+};
+
 export class EnemyEntity extends Character {
     aggroRadius: number = 150; 
     isAgro: boolean = false;
@@ -22,7 +34,7 @@ export class EnemyEntity extends Character {
             x, y,
             initialCombatStats,
             false, // isPlayerCharacter
-            enemyTemplate.baseStats || {} as BaseStats, // Provide enemy's own base stats
+            { ...defaultEnemyBaseStats, ...(enemyTemplate.baseStats || {}) }, // Provide enemy's own base stats
             undefined, // no classDetails
             enemyTemplate,
             playerLevelScale

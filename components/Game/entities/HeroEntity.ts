@@ -1,3 +1,4 @@
+
 import { Character } from './Character';
 import type { CombatCapable, UpdateResult } from '../entityInterfaces';
 import { Projectile } from './Projectile'; 
@@ -44,7 +45,7 @@ export class HeroEntity extends Character {
     performAttack(): { damageDealt: number; isCrit: boolean; lifeStolen?: number; projectile?: Projectile; } | null {
         if (!this.target) return null;
     
-        let isCrit = this.combatStats.chanceCritica && Math.random() * 100 < this.combatStats.chanceCritica;
+        let isCrit = !!(this.combatStats.chanceCritica && Math.random() * 100 < this.combatStats.chanceCritica);
         let finalDamage = this.effectiveDamage;
         let bonusDamageFromBuff = 0;
     

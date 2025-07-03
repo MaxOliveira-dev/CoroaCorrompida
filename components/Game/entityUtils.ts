@@ -1,7 +1,7 @@
 
 
 import type { BaseStats, ClassData, EnemyTemplate, CombatStats, Item, EquippedItems, ActiveBuffDebuff, ActiveBuffDebuffEffect } from '../../types';
-import type { CombatCapable } from '../entityInterfaces';
+import type { CombatCapable } from './entityInterfaces';
 
 export let entityIdCounter = 0;
 export const getEntityId = () => entityIdCounter++;
@@ -129,7 +129,7 @@ export const calculateFinalStatsForEntity = (
         }
         finalVelocidadeMovimento = enemyDetails.velocidadeMovimento * (1 + ((calculatedStats.velocidadeMovimento || enemyDetails.velocidadeMovimento) - enemyDetails.velocidadeMovimento) / enemyDetails.velocidadeMovimento);
         size = enemyDetails.size || 20;
-        isBoss = enemyDetails.isBoss;
+        isBoss = enemyDetails.isBoss ?? false;
         emoji = enemyDetails.emoji;
         
         // Ensure other base stats for enemies are initialized if not present, after scaling

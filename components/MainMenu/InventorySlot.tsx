@@ -5,7 +5,7 @@ import type { Item } from '../../types';
 interface InventorySlotProps {
   id: string;
   item: Item | null;
-  onClick: () => void;
+  onClick?: () => void;
   ariaLabel: string;
   onShowTooltip?: (item: Item, event: React.MouseEvent) => void;
   onHideTooltip?: () => void;
@@ -41,12 +41,12 @@ const InventorySlot: React.FC<InventorySlotProps> = ({
                   ${hasItem ? itemTierClass : 'bg-brand-card-locked'} 
                   ${onClick && hasItem ? 'cursor-pointer hover:brightness-110 active:scale-95' : 'cursor-default'}
                   border-2 ${hasItem ? 'border-gray-600' : 'border-gray-500'}`}
-      onClick={onClick}
+      onClick={hasItem && onClick ? onClick : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onKeyDown={onClick && hasItem ? (e) => e.key === 'Enter' && onClick() : undefined}
-      tabIndex={onClick && hasItem ? 0 : -1}
-      role={onClick && hasItem ? "button" : "img"}
+      onKeyDown={hasItem && onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+      tabIndex={hasItem && onClick ? 0 : -1}
+      role={hasItem && onClick ? "button" : "img"}
       aria-label={item ? `${ariaLabel}: ${item.name}` : `${ariaLabel}: Vazio`}
       title={item ? item.name : "Slot Vazio"}
     >

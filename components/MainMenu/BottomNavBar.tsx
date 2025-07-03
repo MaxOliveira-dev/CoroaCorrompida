@@ -31,8 +31,8 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeItem, onNavChange, fo
     <div className="bg-brand-card flex justify-around items-center p-1 shadow-inner border-t-2 border-brand-surface">
       {NAV_ITEMS.map((item) => {
         const isActive = item.key === activeItem;
-        const showForgeNotification = item.key === 'Forjar' && forgeNotificationCount && forgeNotificationCount > 0;
-        const showBestiaryNotification = item.key === 'Bestiário' && bestiaryNotificationCount && bestiaryNotificationCount > 0;
+        const showForgeNotification = item.key === 'Forjar' && (forgeNotificationCount || 0) > 0;
+        const showBestiaryNotification = item.key === 'Bestiário' && (bestiaryNotificationCount || 0) > 0;
 
         return (
           <button
@@ -47,8 +47,8 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeItem, onNavChange, fo
             
             {(showForgeNotification || showBestiaryNotification) && (
               <span className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 bg-red-500 text-white text-[9px] sm:text-[10px] font-bold w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-full flex items-center justify-center border-2 border-brand-card">
-                {item.key === 'Forjar' ? (forgeNotificationCount > 9 ? '9+' : forgeNotificationCount) :
-                 item.key === 'Bestiário' ? (bestiaryNotificationCount > 9 ? '9+' : bestiaryNotificationCount) : ''}
+                {item.key === 'Forjar' ? ((forgeNotificationCount || 0) > 9 ? '9+' : forgeNotificationCount) :
+                 item.key === 'Bestiário' ? ((bestiaryNotificationCount || 0) > 9 ? '9+' : bestiaryNotificationCount) : ''}
               </span>
             )}
           </button>

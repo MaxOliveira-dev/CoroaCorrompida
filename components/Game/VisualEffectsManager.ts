@@ -2,7 +2,7 @@
 
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import type { HeroEntity } from './entities/HeroEntity'; // For hero type hint
-import type { CombatCapable } from '../entityInterfaces'; // Import CombatCapable for broader type compatibility
+import type { CombatCapable } from './entityInterfaces'; // Import CombatCapable for broader type compatibility
 
 interface ActiveEffect {
     displayObject: Container;
