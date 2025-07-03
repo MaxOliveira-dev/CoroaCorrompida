@@ -948,7 +948,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
         if (boss) drawBossHealthBar(ctx, boss);
         
         pixiApp.renderer.render(pixiApp.stage);
-        visualEffectsManagerRef.current?.update(deltaTime);
+        if (visualEffectsManagerRef.current) {
+            visualEffectsManagerRef.current.update(deltaTime);
+        }
 
         const isBossLevel = currentLevel > 0 && currentLevel % 10 === 0;
         if (!hasEndedLevel.current && internalGameState === GameState.BATTLE) {

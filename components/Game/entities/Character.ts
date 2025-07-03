@@ -1,4 +1,5 @@
 
+
 import type { Point, ActiveBuffDebuff, ActiveBuffDebuffEffect, BaseStats, ClassData, EnemyTemplate, EquippedItems, Ability as AbilityType } from '../../../types'; // Added missing type imports
 import type { CombatCapable, UpdateResult } from '../entityInterfaces';
 import { Projectile } from './Projectile';
@@ -349,7 +350,7 @@ export class Character implements CombatCapable {
     performAttack(): { damageDealt: number, isCrit: boolean, lifeStolen?: number, projectile?: Projectile } | null {
         if (!this.target) return null;
 
-        let isCrit = !!(this.combatStats.chanceCritica && Math.random() * 100 < this.combatStats.chanceCritica);
+        let isCrit: boolean = !!(this.combatStats.chanceCritica && Math.random() * 100 < this.combatStats.chanceCritica);
         let finalDamage = this.effectiveDamage;
         let bonusDamageFromBuff = 0;
 
