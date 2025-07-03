@@ -71,7 +71,7 @@ export class Projectile {
         this.trailType = options.trailType;
     }
 
-    private onHit(target: CombatCapable, allTargets: CombatCapable[], vfxManager?: VisualEffectsManager): ProjectileUpdateResult {
+    private onHit(target: CombatCapable, allTargets: CombatCapable[], vfxManager?: VisualEffectsManager | null): ProjectileUpdateResult {
         if (this.hitTargetIds.includes(target.id)) return {};
         this.hitTargetIds.push(target.id);
         
@@ -183,7 +183,7 @@ export class Projectile {
         return { newDamageNumbers, newEffects };
     }
 
-    update(deltaTime: number, potentialTargets: CombatCapable[], vfxManager?: VisualEffectsManager): ProjectileUpdateResult { 
+    update(deltaTime: number, potentialTargets: CombatCapable[], vfxManager?: VisualEffectsManager | null): ProjectileUpdateResult { 
         this.lifetimeMs -= deltaTime;
         if (this.lifetimeMs <= 0) {
             if (!this.piercing) this.hitTargetIds.push(-1); // Mark as "dead"
