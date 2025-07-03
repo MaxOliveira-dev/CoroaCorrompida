@@ -33,7 +33,7 @@ interface GameContainerProps {
 const defaultEmptyBaseStats: BaseStats = { // Used for enemies if their template lacks base stats
     letalidade: 0, vigor: 0, resistencia: 0, 
     velocidadeAtaque: 0, velocidadeMovimento: 1, 
-    chanceCritica: 0, danoCritico: 50, // Default danoCritico to 50% posso mudar depois
+    chanceCritica: 0, danoCritico: 50, // Default danoCritico to 50%
     chanceEsquiva: 0, vampirismo: 0 
 };
 
@@ -407,6 +407,37 @@ const GameContainer: React.FC<GameContainerProps> = ({
     
         // This switch is now generic for any hero
         switch (ability.id) {
+            case 'GUERREIRO_INTERCEPTAR': {
+                const livingEnemies = enemies.filter(e => e.isAlive);
+                if (livingEnemies.length === 0) {
+                    setMessage("Nenhum alvo para Interceptar!");
+                    return; // Return early, don't put on cooldown
+                }
+                livingEnemies.sort((a, b) => distanceToTarget(hero, a) - distanceToTarget(hero, b));
+                const nearestEnemy = livingEnemies[0];
+    
+                hero.applyBuff({
+                    id: ability.id,
+                    abilityId: ability.id,
+                    name: 'Interceptando',
+                    icon: ability.icon,
+                    durationMs: ability.durationMs || 2000,
+                    remainingMs: ability.durationMs || 2000,
+                    effects: {
+                        dashToTarget: {
+                            targetId: nearestEnemy.id,
+                            speedMultiplier: ability.properties?.speedMultiplier,
+                            onHitEffect: ability.properties?.onHitEffect,
+                        }
+                    },
+                    appliedAt: Date.now(),
+                    isBuff: true,
+                    sourceEntityId: hero.id,
+                    targetEntityId: hero.id
+                });
+                vfxManager?.showInterceptarTrail(hero, ability.durationMs || 2000);
+                break;
+            }
             case 'AVENTUREIRO_SOCO_SERIO':
                 if (hero.target && hero.target.isAlive) {
                     const target = hero.target;
@@ -427,21 +458,6 @@ const GameContainer: React.FC<GameContainerProps> = ({
                     } else { setMessage("Alvo fora de alcance!"); return; }
                 } else { setMessage("Nenhum alvo para o Soco Sério!"); return; }
                 break;
-            case 'GUERREIRO_GOLPE_CERTEIRO': hero.applyBuff({ id: ability.id, abilityId: ability.id, name: ability.name, icon: ability.icon, durationMs: ability.durationMs || 5000, remainingMs: ability.durationMs || 5000, effects: { nextAttackCrit: !!ability.properties?.nextAttackCrit, nextAttackBonusDamagePercentTargetMaxHp: ability.properties?.bonusDamagePercentTargetMaxHp }, appliedAt: Date.now(), sourceEntityId: hero.id, targetEntityId: hero.id, isBuff: true }); vfxManager?.showGolpeCerteiro(hero); break;
-            case 'GUERREIRO_CORTE_CRESCENTE': 
-                 const coneRange = ability.properties?.range || 60; const coneAngleDeg = ability.properties?.angle || 90; const coneAngleRad = coneAngleDeg * (Math.PI / 180); const heroDirectionRad = hero.target ? Math.atan2(hero.target.y - hero.y, hero.target.x - hero.x) : (hero.x > canvasSize.width / 2 ? Math.PI : 0); const abilityDamage = hero.effectiveDamage + (hero.combatStats.letalidade * (ability.properties?.damageLethalityMultiplier || 2.0)); const resistanceReduction = ability.properties?.resistanceReductionPercent || 20; const debuffDuration = ability.properties?.debuffDurationMs || 5000;
-                 enemies.forEach(enemy => {
-                    if (enemy.isAlive && isTargetInCone(hero.x, hero.y, enemy.x, enemy.y, coneRange, coneAngleRad, heroDirectionRad)) {
-                        const dmgTaken = enemy.takeDamage(abilityDamage, false, hero);
-                        if (!enemy.isAgro) { enemy.isAgro = true; enemy.agroAllies(enemies); }
-                        if (typeof dmgTaken === 'number') damageNumbersToSet.push(new DamageNumber(dmgTaken, enemy.x, enemy.y, 'white'));
-                        if (enemy.currentHp <= 0 && !enemy.deathEffectCreated) { effectsToSet.push(new DeathEffect(enemy.x, enemy.y, enemy.isBoss ? '#C62828' : '#757575', enemy.isBoss ? 35 : 15, enemy.isBoss ? 60 : 30)); enemy.deathEffectCreated = true; }
-                        enemy.applyDebuff({ id: `${ability.id}_${enemy.id}`, abilityId: ability.id, name: "Cortado", icon: "🩸", durationMs: debuffDuration, remainingMs: debuffDuration, effects: { resistanceReductionPercent: resistanceReduction }, appliedAt: Date.now(), isBuff: false, targetEntityId: enemy.id, sourceEntityId: hero.id });
-                    }
-                });
-                hero.attackAnimProgress = 1; vfxManager?.showCorteCrescente(hero.x, hero.y, heroDirectionRad, coneRange, coneAngleDeg); break;
-            case 'GUERREIRO_FORCA_EXTREMA': hero.applyBuff({ id: ability.id, abilityId: ability.id, name: ability.name, icon: ability.icon, durationMs: ability.durationMs || 10000, remainingMs: ability.durationMs || 10000, effects: { letalidadePercent: ability.properties?.lethalityBonusPercent, vigorPercent: ability.properties?.vigorBonusPercent }, appliedAt: Date.now(), isBuff: true, targetEntityId: hero.id, sourceEntityId: hero.id }); const healThreshold = ability.properties?.healPercentMaxHpIfBelowHalf || 0; if (healThreshold > 0 && hero.currentHp < hero.maxHp / 2) { const healAmount = Math.round(hero.maxHp * (healThreshold / 100)); hero.currentHp = Math.min(hero.maxHp, hero.currentHp + healAmount); hero.healingDone += healAmount; didHealForForcaExtrema = true; damageNumbersToSet.push(new DamageNumber(`+${healAmount}`, hero.x, hero.y - 10, 'green')); } vfxManager?.showForcaExtrema(hero, ability.durationMs || 10000, didHealForForcaExtrema); break;
-            case 'GUERREIRO_GOLPE_GIRATORIO': hero.applyBuff({ id: ability.id, abilityId: ability.id, name: ability.name, icon: ability.icon, durationMs: ability.durationMs || 5000, remainingMs: ability.durationMs || 5000, effects: { isImmobile: true, channeledDamageAura: { tickIntervalMs: ability.properties?.damageTickIntervalMs, damageMultiplier: ability.properties?.tickDamageMultiplier, isCrit: true, radius: hero.range * 2, lastTickTime: Date.now() } }, appliedAt: Date.now(), isBuff: true, targetEntityId: hero.id, sourceEntityId: hero.id }); vfxManager?.showGolpeGiratorio(hero, ability.durationMs || 5000); break;
             case 'MAGO_BOLA_DE_FOGO':
                 if (hero.target && hero.target.isAlive) {
                     if (distanceToTarget(hero, hero.target) <= hero.range * 1.2) {

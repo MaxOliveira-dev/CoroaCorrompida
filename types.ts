@@ -131,6 +131,16 @@ export interface ActiveBuffDebuffEffect {
     multiShot?: {
         count: number;
     };
+    dashToTarget?: {
+        targetId: number;
+        speedMultiplier: number;
+        onHitEffect: {
+            lethalityMultiplier: number;
+            vigorMultiplier: number;
+            stunDurationMs: number;
+            alwaysCrit: boolean;
+        };
+    };
     // Add other specific effects as needed
 }
 

@@ -1,6 +1,5 @@
 
 
-
 import { Character } from './Character';
 import type { CombatCapable, UpdateResult } from '../entityInterfaces';
 import { Projectile } from './Projectile'; 
@@ -117,6 +116,73 @@ export class HeroEntity extends Character {
         const baseUpdate = super.update(deltaTime, heroes, enemies, canvasSize); 
         const results = baseUpdate.results;
         if (!this.isAlive) return baseUpdate;
+        
+        // --- DASH LOGIC ---
+        const dashBuff = this.activeBuffs.find(b => b.effects.dashToTarget);
+        if (dashBuff?.effects.dashToTarget) {
+            const dashInfo = dashBuff.effects.dashToTarget;
+            const dashTarget = enemies.find(e => e.id === dashInfo.targetId);
+
+            if (dashTarget && dashTarget.isAlive) {
+                this.target = dashTarget; // Force target override
+                const dist = distanceToTarget(this, dashTarget);
+                
+                // Check for hit
+                if (dist < (this.size / 2 + dashTarget.size / 2)) {
+                    // HIT! Apply effect
+                    const onHit = dashInfo.onHitEffect;
+                    
+                    let damage = (this.classDetails?.damage || 0) +
+                                 (this.combatStats.letalidade * (onHit.lethalityMultiplier || 0)) +
+                                 (this.combatStats.vigor * (onHit.vigorMultiplier || 0));
+
+                    if (onHit.alwaysCrit) {
+                        damage = Math.round(damage * (1 + (this.combatStats.danoCritico || 50) / 100));
+                    }
+                    damage = Math.max(1, Math.round(damage));
+
+                    const dmgTaken = dashTarget.takeDamage(damage, true, this);
+                    this.afterDealingDamage(dashTarget, enemies);
+                    
+                    if (typeof dmgTaken === 'number') {
+                        results.push({ newDamageNumber: new DamageNumber(dmgTaken, dashTarget.x, dashTarget.y, 'orange') });
+                    }
+                    
+                    // Apply stun
+                    dashTarget.applyDebuff({
+                        id: `stun_${dashTarget.id}_intercept`,
+                        abilityId: 'GUERREIRO_INTERCEPTAR_STUN',
+                        name: 'Atordoado',
+                        icon: '💫',
+                        durationMs: onHit.stunDurationMs,
+                        remainingMs: onHit.stunDurationMs,
+                        effects: { isImmobile: true },
+                        appliedAt: Date.now(),
+                        isBuff: false,
+                        sourceEntityId: this.id,
+                        targetEntityId: dashTarget.id
+                    });
+
+                    this.activeBuffs = this.activeBuffs.filter(b => b.id !== dashBuff.id);
+                    this.recalculateStats();
+                } else {
+                    // Not hit yet, continue moving
+                    const angle = Math.atan2(dashTarget.y - this.y, dashTarget.x - this.x);
+                    const modifiedSpeed = this.movementSpeed * dashInfo.speedMultiplier;
+                    this.x += Math.cos(angle) * modifiedSpeed;
+                    this.y += Math.sin(angle) * modifiedSpeed;
+                }
+            } else {
+                // Target died or doesn't exist, remove buff
+                this.activeBuffs = this.activeBuffs.filter(b => b.id !== dashBuff.id);
+                this.recalculateStats();
+            }
+            
+            baseUpdate.results.push(...results);
+            return baseUpdate; // Return early from update to prevent other movement/attack logic
+        }
+
+        // --- END DASH LOGIC ---
 
         this.findTarget(enemies); 
         

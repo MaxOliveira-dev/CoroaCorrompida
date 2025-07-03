@@ -202,48 +202,24 @@ const ADVENTURER_ABILITIES: Ability[] = [
 
 const WARRIOR_ABILITIES: Ability[] = [
     {
-        id: 'GUERREIRO_GOLPE_CERTEIRO',
-        name: 'Golpe Certeiro',
-        icon: '💥',
-        description: 'Seu próximo ataque é crítico garantido e causa dano adicional com base em 10% da vida total do alvo.',
-        cooldownMs: 8000,
-        effectType: 'ATTACK_MODIFIER',
-        targetType: 'SELF',
-        durationMs: 5000, // Buff window for next attack
-        properties: { nextAttackCrit: true, bonusDamagePercentTargetMaxHp: 10 }
+        id: 'GUERREIRO_INTERCEPTAR',
+        name: 'Interceptar',
+        icon: '🦶',
+        description: 'Você corre em direção ao inimigo mais próximo numa velocidade 3x maior que a sua velocidade normal, ao chegar perto do inimigo o golpeia causando dano ( dano base + 150% da letalidade + 100% do vigor), além disso atordoa o inimigo por 1,5 segundos. Essa habilidade sempre causa dano crítico.',
+        cooldownMs: 10000,
+        effectType: 'SELF_BUFF',
+        targetType: 'NONE',
+        durationMs: 2000,
+        properties: {
+            speedMultiplier: 3,
+            onHitEffect: {
+                lethalityMultiplier: 1.5,
+                vigorMultiplier: 1.0,
+                stunDurationMs: 1500,
+                alwaysCrit: true,
+            },
+        },
     },
-    {
-        id: 'GUERREIRO_CORTE_CRESCENTE',
-        name: 'Corte Crescente',
-        icon: '🗡',
-        description: 'Causa dano (dano base + 200% da letalidade) em cone e aplica "Cortado" (-20% resistência) por 5s.',
-        cooldownMs: 6000,
-        effectType: 'AOE_DAMAGE_DEBUFF',
-        targetType: 'CONE_ENEMY',
-        properties: { damageBaseMultiplier: 1, damageLethalityMultiplier: 2.0, resistanceReductionPercent: 20, debuffDurationMs: 5000, range: 60, angle: 90 }
-    },
-    {
-        id: 'GUERREIRO_FORCA_EXTREMA',
-        name: 'Força Extrema',
-        icon: '💪',
-        description: 'Aumenta letalidade e vigor em 50%. Se vida < 50%, cura 20% da vida total.',
-        cooldownMs: 12000,
-        effectType: 'SELF_BUFF', // Also SELF_HEAL conditionally
-        targetType: 'SELF',
-        durationMs: 10000,
-        properties: { lethalityBonusPercent: 50, vigorBonusPercent: 50, healPercentMaxHpIfBelowHalf: 20 }
-    },
-    {
-        id: 'GUERREIRO_GOLPE_GIRATORIO',
-        name: 'Golpe Giratório',
-        icon: '🌀',
-        description: 'Durante 5s, fica imóvel mas causa dano crítico em área ao redor.',
-        cooldownMs: 20000,
-        effectType: 'CHANNELED_DAMAGE_AURA',
-        targetType: 'AOE_AROUND_SELF',
-        durationMs: 5000,
-        properties: { damageTickIntervalMs: 500, tickDamageMultiplier: 0.5, isImmobile: true } // Example: 50% of normal attack as crit per tick
-    }
 ];
 
 const ARCHER_ABILITIES: Ability[] = [

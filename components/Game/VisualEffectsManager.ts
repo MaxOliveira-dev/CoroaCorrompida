@@ -84,191 +84,61 @@ export class VisualEffectsManager {
     }
 
     // --- Warrior Ability Effects ---
-
-    public showGolpeCerteiro(hero: CombatCapable): void { // Changed to CombatCapable
-        const glow = new Graphics();
-        
-        const duration = 1500; // ms
+    public showInterceptarTrail(hero: CombatCapable, durationMs: number): void {
+        const container = new Container();
         let elapsed = 0;
+        let lastParticleTime = 0;
+        const particleInterval = 30; // ms
 
-        this.addEffect(glow, (deltaSeconds) => {
-            elapsed += deltaSeconds * 1000;
-            const progress = elapsed / duration;
-            if (progress >= 1) {
-                return false; // Remove effect
-            }
-            
-            glow.x = hero.x; // update position
-            glow.y = hero.y - hero.size * 0.2;
-
-            glow.clear();
-            const currentRadius = 10 + Math.sin(progress * Math.PI) * 15; // Pulsate
-            const currentAlpha = Math.sin(progress * Math.PI); // Fade in and out
-
-            glow.beginFill(0xFFD700, currentAlpha * 0.7); // Gold
-            glow.drawCircle(0, 0, currentRadius);
-            glow.endFill();
-            
-            // Starburst shape
-            const numPoints = 5;
-            const outerRadius = currentRadius * 1.2;
-            const innerRadius = currentRadius * 0.6;
-            glow.beginFill(0xFFEEAA, currentAlpha * 0.5);
-            for (let i = 0; i < numPoints * 2; i++) {
-                const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                const angle = (i / (numPoints * 2)) * Math.PI * 2 - Math.PI / 2;
-                const xPos = Math.cos(angle) * radius;
-                const yPos = Math.sin(angle) * radius;
-                if (i === 0) glow.moveTo(xPos, yPos);
-                else glow.lineTo(xPos, yPos);
-            }
-            glow.closePath();
-            glow.endFill();
-
-            return true; // Keep effect
-        }, duration);
-    }
-
-    public showCorteCrescente(heroX: number, heroY: number, directionAngle: number, range: number, coneAngleDegrees: number): void {
-        const slash = new Graphics();
-        slash.x = heroX;
-        slash.y = heroY;
-        slash.rotation = directionAngle;
-
-        const duration = 300; // ms
-        let elapsed = 0;
-        const coneAngleRadians = coneAngleDegrees * (Math.PI / 180);
-
-        this.addEffect(slash, (deltaSeconds) => {
-            elapsed += deltaSeconds * 1000;
-            const progress = elapsed / duration;
-            if (progress >= 1) {
-                return false; 
-            }
-
-            const currentRange = range * progress;
-            const currentAlpha = 1.0 - progress;
-
-            slash.clear();
-            slash.beginFill(0xC0C0C0, currentAlpha * 0.8); // Silver
-            slash.moveTo(0, 0);
-            slash.arc(0, 0, currentRange, -coneAngleRadians / 2, coneAngleRadians / 2);
-            slash.closePath();
-            slash.endFill();
-
-            slash.lineStyle(2, 0xFFFFFF, currentAlpha);
-             slash.moveTo(0,0);
-            slash.arc(0, 0, currentRange * 0.95, -coneAngleRadians / 2, coneAngleRadians / 2); // Inner arc for definition
-
-            return true;
-        }, duration);
-    }
-
-    public showForcaExtrema(hero: CombatCapable, buffDurationMs: number, didHeal: boolean): void { // Changed to CombatCapable
-        const aura = new Graphics();
-    
-        let elapsed = 0;
-    
-        this.addEffect(aura, (deltaSeconds) => {
-            elapsed += deltaSeconds * 1000;
-            const progress = elapsed / buffDurationMs;
-            if (progress >= 1) {
-                return false;
-            }
-
-            aura.x = hero.x;
-            aura.y = hero.y;
-    
-            aura.clear();
-            const pulse = Math.sin(elapsed * 0.01) * 0.1 + 0.9; // Slow pulse (0.8 to 1.0 scale)
-            const currentRadius = hero.size * 0.8 * pulse;
-            const currentAlpha = (0.5 + Math.sin(elapsed * 0.005) * 0.2) * (1 - progress * 0.5) ; // Pulsating alpha, fades out slightly
-    
-            aura.beginFill(0xFF0000, currentAlpha * 0.6); // Red
-            aura.drawCircle(0, 0, currentRadius);
-            aura.endFill();
-    
-            return true;
-        }, buffDurationMs);
-
-        if (didHeal) {
-            for (let i = 0; i < 10; i++) {
-                const particle = new Graphics();
-                particle.x = hero.x;
-                particle.y = hero.y;
-                const speed = 120 + Math.random() * 180;
-                const angle = Math.random() * Math.PI * 2;
-                const particleVx = Math.cos(angle) * speed;
-                const particleVy = Math.sin(angle) * speed;
-                const particleDuration = 0.5 + Math.random() * 0.5;
-                let particleElapsed = 0;
-
-                this.addEffect(particle, (deltaSeconds) => {
-                    particleElapsed += deltaSeconds;
-                    if (particleElapsed >= particleDuration) return false;
-
-                    particle.x += particleVx * deltaSeconds;
-                    particle.y += particleVy * deltaSeconds;
-                    
-                    const pProgress = particleElapsed / particleDuration;
-                    const pAlpha = 1 - pProgress;
-                    const pSize = (5 + Math.random() * 5) * (1 - pProgress);
-
-                    particle.clear();
-                    particle.beginFill(0x00FF00, pAlpha * 0.8); // Green
-                    particle.drawCircle(0, 0, pSize);
-                    particle.endFill();
-                    return true;
-                }, particleDuration * 1000);
-            }
-        }
-    }
-
-    public showGolpeGiratorio(hero: CombatCapable, abilityDurationMs: number): void { // Changed to CombatCapable
-        const numBlades = 8;
-        const bladeLength = hero.size * 0.8;
-        const bladeWidth = hero.size * 0.15;
-        const orbitRadius = hero.size * 0.6;
-        let elapsed = 0;
-
-        const container = new Container(); // Use a container for easier management
-        
-        const blades: Graphics[] = [];
-        for (let i = 0; i < numBlades; i++) {
-            const blade = new Graphics();
-            blade.beginFill(0xD0D0D0); // Light grey metallic
-            blade.drawRect(-bladeWidth / 2, -bladeLength / 2, bladeWidth, bladeLength);
-            blade.endFill();
-            blade.pivot.set(0, -bladeLength / 2); // Pivot at one end for rotation around hero
-            container.addChild(blade);
-            blades.push(blade);
-        }
+        const particles: { g: Graphics, life: number, maxLife: number }[] = [];
 
         this.addEffect(container, (deltaSeconds) => {
             elapsed += deltaSeconds * 1000;
-            if (elapsed >= abilityDurationMs) {
-                 blades.forEach(b => b.destroy()); // Clean up individual blades
+            if (elapsed >= durationMs || !hero.isAlive) {
+                particles.forEach(p => { container.removeChild(p.g); p.g.destroy(); });
                 return false;
             }
 
-            container.x = hero.x; // Update position if hero moves (though ability says hero is immobile)
-            container.y = hero.y;
+            // Update existing particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.life += deltaSeconds;
+                if (p.life >= p.maxLife) {
+                    container.removeChild(p.g);
+                    p.g.destroy();
+                    particles.splice(i, 1);
+                    continue;
+                }
+                const progress = p.life / p.maxLife;
+                p.g.alpha = 1 - progress;
+                p.g.scale.set(1 - progress);
+            }
 
-            const rotationSpeedRadPerSec = 12;
-            const overallRotation = elapsed * 0.001 * rotationSpeedRadPerSec;
+            // Create new particles
+            if (elapsed - lastParticleTime > particleInterval) {
+                lastParticleTime = elapsed;
+                const pGraphics = new Graphics();
+                pGraphics.x = hero.x;
+                pGraphics.y = hero.y;
 
-            blades.forEach((blade, i) => {
-                const angle = (i / numBlades) * Math.PI * 2 + overallRotation;
-                blade.x = Math.cos(angle) * orbitRadius;
-                blade.y = Math.sin(angle) * orbitRadius;
-                blade.rotation = angle + Math.PI / 2; // Point outwards
-                blade.alpha = 0.7 + Math.sin(elapsed * 0.01 + i) * 0.3; // Shimmer
-            });
+                const particle = {
+                    g: pGraphics,
+                    life: 0,
+                    maxLife: 0.4 + Math.random() * 0.3, // seconds
+                };
+                
+                pGraphics.beginFill(0xFF0000, 0.7);
+                pGraphics.drawCircle(0, 0, hero.size * 0.3);
+                pGraphics.endFill();
+
+                particles.push(particle);
+                container.addChild(pGraphics);
+            }
 
             return true;
-        }, abilityDurationMs);
+        }, durationMs);
     }
-
+    
     // --- Assassin Ability Effects ---
     public showModoOcultoSmoke(hero: CombatCapable): void {
         const smokeDuration = 800; // ms
